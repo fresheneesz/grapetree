@@ -107,7 +107,7 @@ window.onpopstate = function() {
 // trigger the browser to change its url when your application changes the router path
 router.on('go', function(path) {
     var cur = window.location
-    if('/'+cur.pathname !== path) {  // only push state if the url is different
+    if(cur.pathname !== path) {  // only push state if the url is different
          history.pushState({}, 'title', cur.protocol+'//'+cur.host+path)
     }
 })
