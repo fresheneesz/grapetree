@@ -3,7 +3,7 @@
 
 A simple, powerful generalized hierarchical path-routing module for client-side and server-side applications.
 
-Using grapetree applications can be written as a tree of routes where a number of routes are active at any given time.
+Using grapetree, applications can be written as a tree of routes where a number of routes are active at any given time.
 A URL is broken into a set of routes and each route can perform some work like loading data and rendering views.
 Two routes that share a parent route can share some of the same functionality or data.
 
@@ -95,7 +95,7 @@ var router = Grapetree(function() { // root
 
     this.default(function(path) {   // default routes can be set up if none match
     	this.enter(function() {
-        	show404Page("Sorry, "+page+" doesn't exist")
+        	show404Page("Sorry, "+path+" doesn't exist")
         })
     })
 })
