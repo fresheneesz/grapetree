@@ -8,7 +8,7 @@ A URL is broken into a set of routes and each route can perform some work like l
 Two routes that share a parent route can share some of the same functionality or data.
 
 Like [crossroads.js](http://millermedeiros.github.io/crossroads.js/), [router.js](https://github.com/tildeio/router.js), and [cherrytree](https://github.com/QubitProducts/cherrytree),
-`grapetree-core` embraces the [single-responsibility principle ](http://en.wikipedia.org/wiki/Single_responsibility_principle)
+`grapetree` embraces the [single-responsibility principle ](http://en.wikipedia.org/wiki/Single_responsibility_principle)
 and is entirely stand-alone, free of any dependencies on a framework of any kind.
 
 For a frontend application using grapetree, routes are the central part of the application - that's are where you create models, views and manage their lifecycle.
@@ -192,7 +192,7 @@ Route Lifecycle Hooks
 
 #### Explanation
 
-The routing hooks in `grapetree-core` are simple but powerful. Basically exit handlers are called from leaf-node routes inward, and enter handlers are called outward toward the leaf-nodes.
+The routing hooks in `grapetree` are simple but powerful. Basically `exit` handlers are called from leaf-node routes inward, and `enter` handlers are called outward toward the leaf-nodes.
 
 ```javascript
 var router = Router(function() { // root
@@ -242,7 +242,7 @@ The order the handlers are called in the above example is:
 
 If you have  multiple levels of exit or enter handlers, things get slightly more complicated:
 
-``javascript
+```javascript
 var router = Router(function() { // root
     this.route('a', function() {
     	this.enter(function() {
@@ -294,6 +294,7 @@ Todo
 Changelog
 ========
 
+* 0.0.2 - pulling in minor fix from core
 * 0.0.1 - first version
 
 How to Contribute!
