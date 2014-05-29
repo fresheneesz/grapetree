@@ -266,6 +266,7 @@ Todo
 Changelog
 ========
 
+* 0.3.0 - pulling in change from core for bubbling default handlers
 * 0.2.0 - pulling in minor api change from core - exit handlers get two arguments now
 * 0.1.0 - pulling in minor fix from core and another minor fix
 * 0.0.1 - first version
