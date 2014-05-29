@@ -7,6 +7,7 @@ var Router = require("../grapetree")
 // NOTE: also check out grapetree-core's unit tests: https://github.com/fresheneesz/grapetree-core/blob/master/test/grapetreeCoreTest.js
 Unit.test("grapetree", function(t) {
 
+
     //*
     this.test('basic stuff', function(t) {
         this.count(6)
@@ -20,12 +21,14 @@ Unit.test("grapetree", function(t) {
             })
 
             this.route('yy/zz/{}', function(param) {
-                t.ok(param === '3')
+                this.enter(function() {
+                    t.eq(param, '3')
+                })
             })
         })
 
         var n=0
-        router.on('go', function(newPath) { // router is an EventEmitter
+        router.on('change', function(newPath) { // router is an EventEmitter
             if(n===0) {
                 t.eq(newPath, '/xx')
             } else if(n===1) {
@@ -33,20 +36,18 @@ Unit.test("grapetree", function(t) {
             } else if(n===2) {
                 t.eq(newPath, '/yy/zz/3')
             } else {
-                throw new Error("not supposed to get here")
+                throw new Error("not supposed to get here: "+newPath)
             }
 
             n++
         })
 
-        router.go('/xx')
-        router.go('/xx/ww')
-        router.go('/yy/zz/3')
-        try {
-            router.go('/yy/zz/ww')
-        } catch(e) {
-            this.eq(e.message, 'No route matched path: "/yy/zz/ww"')
-        }
+        router.go('/xx').done()
+        router.go('/xx/ww').done()
+        router.go('/yy/zz/3').done()
+        router.go('/yy/zz/ww/ss').catch(function(e) {
+            t.eq(e.message, 'No route matched path: "/yy/zz/ww/ss"')
+        }).done()
 
     })
 
@@ -74,9 +75,9 @@ Unit.test("grapetree", function(t) {
             }
         })
 
-        router.go('"""/x"""')
-        router.go('"""/x/y/z"""')
-        router.go('"""/x/w"""')
+        router.go('"""/x"""').done()
+        router.go('"""/x/y/z"""').done()
+        router.go('"""/x/w"""').done()
     })
 
     //*/

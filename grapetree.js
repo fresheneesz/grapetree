@@ -25,6 +25,10 @@ module.exports = proto(GrapeTreeCore, function(superclass) {
                     externalPath = that.transform2.toInternal(externalPath)
                 }
 
+
+                if(externalPath === '/') {
+                    return []
+                }
                 if(externalPath.indexOf('/') === 0) {
                     externalPath = externalPath.slice(1)
                 }

@@ -42,7 +42,8 @@ var router = Grapetree(function() { // root
     this.route('blog', function() { // triggered by a path like '/blog'
         this.enter(function() {  // runs when the page is changed to '/blog/...'
             loadBlog()
-            blogSwitch('highlights')
+            var blogSwitchFuture = blogSwitch('highlights')
+            return blogSwitchFuture // sub-route (eg /blog/category/x) will wait until this future is resolved to run
         })
         this.exit(function() {  // runs when the page is change from '/blog/...' to something else (like '/article/...')
             hideBlog()
@@ -102,7 +103,7 @@ var router = Grapetree(function() { // root
 
 // listen for browser back/forward button changes
 window.onpopstate = function() {
-    router.go(window.location.pathname)
+    router.go(window.location.pathname).done()
 }
 // trigger the browser to change its url when your application changes the router path
 router.on('go', function(path) {
@@ -113,7 +114,7 @@ router.on('go', function(path) {
 })
 
 // on-load, run the page's location through the router to load the appropriate stuff
-router.go(window.location.pathname)
+router.go(window.location.pathname).done() // make sure that if you don't pass the future returned by `go` anywhere, that you call done on it (see async-future's docs for more info)
 
 ```
 
@@ -130,69 +131,68 @@ Usage
 =====
 
 ```javascript
-var Grapetree = require('grapetree')
+var GrapeTree = require('grapetree')
 ```
 
-`Grapetree(routeDefinition)` - Returns a new router instance based on `routeDefinition`, which should be a function that gets a `Route` object as its `this` context.
+`GrapeTree(routeDefinition)` - Returns a new router instance based on `routeDefinition`, which should be a function that gets a `Route` object as its `this` context.
 
-`Grapetree.param` - Special value used by `Route.route` - see below.
+`GrapeTree.param` - Special value used by `Route.route` - see below.
+
+`GrapeTree.Future` - A reference to [the async-future module](https://github.com/fresheneesz/asyncFuture), which `grapetree` uses internally. This does not have to be the futures/promises implementation you use to return a future from `enter` and `exit` handlers, but a future must have a `then`, `catch`, and `finally` method.
 
 Router objects
 --------------
 
-`router.go(newPath[, emitGoEvent])` - Changes the current path and triggers the router to fire all the appropriate handlers. `newPath` is the path to change to, `emitGoEvent` is whether to emit the `"go"` event (default true). You  might want to not emit an event if, for example, you want to redirect one path to another, but don't want to change the browser url.
+`router.go(newPath[, emitChangeEvent])` - Changes the current path and triggers the router to fire all the appropriate handlers. `newPath` is the path to change to, `emitChangeEvent` is whether to emit the `"change"` event (default true). Returns [a future](https://github.com/fresheneesz/asyncFuture) that is resolved when the route is complete or has an error that isn't handled by a Route's error handler.
 
-`router.transformPath(trasformFn)` - Sets up path transformation, which modifies the raw path before passing it as an argument to the `"go"` event and `Route.default` handlers. This is mostly used for libraries that want to extend grapetree-core (like grapetree itself).
+`router.transformPath(trasformFns)` - Sets up path transformation, which modifies the internal path before passing it as an argument to the `"change"` event and `Route.default` handlers and after getting an external path from the `router.go` and `Route.route` functions. This is mostly used for libraries that want to extend grapetree (like what grapetree itself does with grapetree-core).
+
+* trasformFns - an object like {toExternal: function(internalPath){...}, toInternal: function(externalPath){...}}
 
 `router.on` - router inherits from [EventEmitter](http://nodejs.org/api/events.html) and so gets all the methods from it like `router.once` and `router.removeListener`. This can throw an exception if no Route `error` handlers catch an exception.
 
 #### Router events
 
-* 'go' - Emitted when the path has changed, but before the router has actually run any of the handlers for it. This is the only event. The event data contains the new path.
+* 'change' - Emitted after all the handlers for a particular new path have been run. This is the only event. The event data contains the new path.
 
 Route objects
 --------------
 
 `this.route(pathSegment, routeDefinition)` - creates a sub-path route. The routes are tested for a match in the order they are called - only one will be used.
 
-* `pathSegment` - the string path to match a route path against (e.g. 'a/b' 'x'). The route only matches if each part (parts separated by '/') in `pathSegment` matches the corresponding parts in the path being changed to. If any of the items in the array are "{}", matching parts of the path being changed to are treated as parameters that will be passed to the `routeDefinition` function.
+* `pathSegment` - the parts of the path to match a route path against (e.g. /a/b or /x). If `pathSegment` is an array, the route only matches if each item in `pathSegment` matches the corresponding parts in the path being changed to. If `pathSegment` is not an array, it is treated as `[pathSegment]`. If any of the items in the array are `GrapeTree.param`, matching parts of the path being changed to are treated as parameters that will be passed to the `routeDefinition` function.
 * `routeDefinition` - a function that gets a `Route` object as its `this` context. It is passed any parameters that exist in `pathSegment` in the same order.
 
 `this.default(routeDefinition)` - creates a default sub-path route that is matched if no other route is.
 
 * `routeDefinition` - a function that gets a `Route` object as its `this` context. It is passed the new pathSegment being changed to. If `router.transformPath` has been called, the parameter will have been transformed with the transform.
 
-`this.enter(levelHandlers...)` - sets up handlers that are called when a path newly "enters" the subroute (see **Route Lifecycle Hooks** for details).
+`this.enter(handler)` - sets up a handler that is called when a path newly "enters" the subroute (see **Route Lifecycle Hooks** for details).
 
-* `levelHandlers...` - `this.enter` can be passed any number of arguments, each being a function that will be called when the path is "entered". The index at which a `levelHandler` is at is significant, and is synchronized with `levelHandler`s in all entered routes (again details below). If `undefined` is passed as an argument, that level is skipped for this route. The first levelHandler is called with the "leaf distance", which is the number of routes between it and the deepest matching route (e.g. for a change from '/a/b/c/d/'' to '/a/b/x/y', x's leaf distance is 1, and y's is 0). This is useful, for example, in situations where you want to redirect to a (default) subroute only if the current route is the last one (leaf distance === 0). Subsequent levelHandlers get the return-value of the previous handler as its argument.
+* `handler(argument, leafDistance)` - a function that will be called when the path is "entered". The `this` context contains a member `leafDistance`, which is the number of routes between it and the deepest matching route (e.g. for a change from /a/b/c/d to /a/b/x/y, x's leaf distance is 1, and y's is 0). This is useful, for example, in situations where you want to redirect to a (default) subroute only if the current route is the last one (`this.leafDistance` === 0). Subsequent levelHandlers get the return-value of the previous handler as its argument. The handler may return [a future](https://github.com/fresheneesz/asyncFuture), which will be waited on before child enter-handlers are called. The enter handler get, as an argument, the result of the parent's returned future.
 
-`this.exit(levelHandlers...)` - sets up handlers that are called when a new path "exits" the subroute (see **Route Lifecycle Hooks** for details).
+`this.exit(handler)` - sets up a handler that is called when a new path "exits" the subroute (see **Route Lifecycle Hooks** for details).
 
-* `levelHandlers...` - `this.exit` can be passed any number of arguments, each being a function that will be called when the path is "exited". The index at which a `levelHandler` is at is significant, and is synchronized with `levelHandler`s in all exited routes (again details below). If `undefined` is passed as an argument, that level is skipped for this route. The first levelHandler is called with the "divergence distance", which is the number of routes between it and the recent path-change (e.g. for a change from '/a/b/c/d/'' to '/a/b/x/y', c's divergence distance is 0, and d's is 1). This is useful, for example, if some work your exit handler does is unnecessary if its parent route's exit handler is called. Subsequent levelHandlers get the return-value of the previous handler as its argument.
+* `handler(divergenceDistance)` - a function that will be called when the path is "exited". The `this` context contains a member `divergenceDistance`, which is the number of routes between it and the recent path-change (e.g. for a change from /a/b/c/d to /a/b/x/y, c's divergence distance is 0, and d's is 1). This is useful, for example, if some work your exit handler does is unnecessary if its parent route's exit handler is called. The handler may return [a future](https://github.com/fresheneesz/asyncFuture), which will be waited on before parent exit-handlers are called.
 
-`this.error(errorHandler)` - Sets up an error handler that is passed errors that happen anywhere in the router. If an error handler is not defined for a particular subroute, the error will be passed to its parent. If an error bubbles to the top, the error is thrown from the `router.go` function itself.
+`this.error(errorHandler)` - Sets up an error handler that is passed errors that happen anywhere in the router. If an error handler is not defined for a particular subroute, the error will be passed to its parent. If an error bubbles to the top, the error is thrown from the `router.go` function itself. The handler may return [a future](https://github.com/fresheneesz/asyncFuture), which will propogate errors from that future to the next error handler up, if that future resolves to an error.
 
-* `errorHandler(stage, error)` - A function that handles the `error`. The first parameter `stage` is the stage of path-changing the error happened in. `stage` can be either "enter", "exit", or "route"
-
+* `errorHandler(error, info)` - A function that handles the `error`. The second parameter is an object with info about where the error happened. It has the following members:
+  * `info.stage` - the stage of path-changing the error happened in. `stage` can be either "enter", "exit", or "route"
+  * `info.location` - the path segement (relative to the current route) where the error happened ('' indicates the current route)
 
 Route Lifecycle Hooks
 -------------
 
 #### Handler order
 
-1. 'go' event handler
+1. 'change' event handler
 2. Exit handlers - from outermost to the divergence route (the route who's parent still matches the new route)
 3. Enter handlers - from the convergence route (the route matching the first segement of the new path) to the outermost new route
 
-#### Handler (exit and enter) level order
-
-1. All level 1s first
-2. All level 2s
-3. etc
-
 #### Explanation
 
-The routing hooks in `grapetree` are simple but powerful. Basically `exit` handlers are called from leaf-node routes inward, and `enter` handlers are called outward toward the leaf-nodes.
+The routing hooks in `grapetree` are simple but powerful. Basically exit handlers are called from leaf-node routes inward, and enter handlers are called outward toward the leaf-nodes.
 
 ```javascript
 var router = Router(function() { // root
@@ -222,56 +222,24 @@ var router = Router(function() { // root
     })
 })
 
-router.on('go', function(newPath) {
+router.on('change', function(newPath) {
     console.log('went to '+newPath.join(','))
 })
 
-router.go('a/x')
-router.go('b')
+router.go('/a/x').then(function() {
+    return router.go('/b')
+}).done()
 ```
 
 The order the handlers are called in the above example is:
 
-1. go event: "went to a,x"
+1. change event: "went to a,x"
 2. entering a
 3. entering x
-4. go event: "went to b"
+4. change event: "went to b"
 5. exiting x
 6. exiting a
 7. entering b
-
-If you have  multiple levels of exit or enter handlers, things get slightly more complicated:
-
-```javascript
-var router = Router(function() { // root
-    this.route('a', function() {
-    	this.enter(function() {
-       		// entering a level 1
-            return 1
-        }, function(one) { // it gets the return value of the previous level as its argument
-            // entering a level 2
-        })
-        this.route('x', function() {
-            this.enter(function() {
-                // entering x level 1
-            }, function() {
-                // entering x level 2
-            })
-        })
-    })
-})
-
-router.go('a/x')
-```
-
-The order the handlers are called in the above example is:
-
-1. entering a level 1
-2. entering x level 1
-3. entering a level 2
-4. entering x level 2
-
-You can use different handler levels to do things like make asynchronous server requests, expecting to wait for the request to be completed in a later level. Its up to you to decide what your application needs. Theses are analogous to [router.js](https://github.com/tildeio/router.js)'s hooks (enter, exit, beforeModel, model, afterModel).
 
 Error Handling
 ==============
@@ -294,7 +262,7 @@ Todo
 Changelog
 ========
 
-* 0.0.2 - pulling in minor fix from core
+* 0.1.0 - pulling in minor fix from core and another minor fix
 * 0.0.1 - first version
 
 How to Contribute!
