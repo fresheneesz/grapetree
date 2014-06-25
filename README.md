@@ -76,11 +76,7 @@ var router = Grapetree(function() { // root
     })
 
     this.route('about', function() {
-        this.enter(function(leafDistance) {
-            if(leafDistance === 0) { // if the url has no more parts after 'about'
-                router.go('/about/info', false) // redirect to render the 'info' subroute (but don't trigger the url to change)
-            }
-        })
+        router.redirect('/about/info') // redirects to render the 'info' subroute if the url has no more parts after 'about'
 
         this.route('info', function() {
             this.enter(function() {
@@ -179,8 +175,7 @@ Route objects
 
 `this.enter(handler)` - sets up a handler that is called when a path newly "enters" the subroute (see **Route Lifecycle Hooks** for details).
 
-* `handler(parentValue, leafDistance)` - a function that will be called when the path is "entered". The handler may return [a future](https://github.com/fresheneesz/asyncFuture), which will be waited on before child enter-handlers are called.
-  * `leafDistance` is the number of routes between it and the deepest matching route (e.g. for a change from /a/b/c/d to /a/b/x/y, x's leaf distance is 1, and y's is 0). This is useful, for example, in situations where you want to redirect to a (default) subroute only if the current route is the last one (`leafDistance === 0`).
+* `handler(parentValue)` - a function that will be called when the path is "entered". The handler may return [a future](https://github.com/fresheneesz/asyncFuture), which will be waited on before child enter-handlers are called.
   * `parentValue` is the value of the future returned by its parent's enter handler, or undefined if no future was returned by its parent.
 
 `this.exit(handler)` - sets up a handler that is called when a new path "exits" the subroute (see **Route Lifecycle Hooks** for details).
