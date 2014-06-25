@@ -76,7 +76,7 @@ var router = Grapetree(function() { // root
     })
 
     this.route('about', function() {
-        router.redirect('/about/info') // redirects to render the 'info' subroute if the url has no more parts after 'about'
+        this.redirect('/about/info') // redirects to render the 'info' subroute if the url has no more parts after 'about'
 
         this.route('info', function() {
             this.enter(function() {
