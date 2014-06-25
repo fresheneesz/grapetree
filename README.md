@@ -114,7 +114,12 @@ router.on('go', function(path) {
 })
 
 // on-load, run the page's location through the router to load the appropriate stuff
-router.go(window.location.pathname).done() // make sure that if you don't pass the future returned by `go` anywhere, that you call done on it (see async-future's docs for more info)
+if(window.location.pathname === '/') {
+    // some default route you want to take the person to on load of the root page
+    router.go('/ticket/create', false).done()  // make sure that if you don't pass the future returned by `go` anywhere, that you call done on it (see async-future's docs for more info)
+} else {
+    router.go(window.location.pathname, false).done()
+}
 
 ```
 
@@ -166,6 +171,11 @@ Route objects
 `this.default(routeDefinition)` - creates a default sub-path route that is matched if no other route is.
 
 * `routeDefinition` - a function that gets a `Route` object as its `this` context. It is passed the new pathSegment being changed to. If `router.transformPath` has been called, the parameter will have been transformed with the transform.
+
+`this.redirect(newPath[, emitOldPath=false])` - Changes the route to be loaded only if no subroute matches. If a subroute matches, the redirect is ignored.
+
+* newPath - the new route
+* emitOldPath - if true, the 'change' event will be triggered with the *original* path
 
 `this.enter(handler)` - sets up a handler that is called when a path newly "enters" the subroute (see **Route Lifecycle Hooks** for details).
 
@@ -266,6 +276,7 @@ Todo
 Changelog
 ========
 
+* 0.4.0 - pulling in change from core for redirecting
 * 0.3.0 - pulling in change from core for bubbling default handlers
 * 0.2.0 - pulling in minor api change from core - exit handlers get two arguments now
 * 0.1.0 - pulling in minor fix from core and another minor fix
