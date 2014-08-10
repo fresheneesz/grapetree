@@ -271,6 +271,7 @@ Todo
 Changelog
 ========
 
+* 0.4.1 - pulling in bug fix from core
 * 0.4.0 - pulling in change from core for redirecting
 * 0.3.0 - pulling in change from core for bubbling default handlers
 * 0.2.0 - pulling in minor api change from core - exit handlers get two arguments now

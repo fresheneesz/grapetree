@@ -1,0 +1,29 @@
+{
+  "name": "grapetree",
+  "version": "0.4.1",
+  "dependencies": {
+    "grapetree-core": {
+      "version": "2.3.1",
+      "from": "grapetree-core@2.3.1",
+      "resolved": "https://registry.npmjs.org/grapetree-core/-/grapetree-core-2.3.1.tgz",
+      "dependencies": {
+        "async-future": {
+          "version": "1.0.1",
+          "from": "async-future@1.0.1",
+          "resolved": "https://registry.npmjs.org/async-future/-/async-future-1.0.1.tgz",
+          "dependencies": {
+            "trimArguments": {
+              "version": "1.0.0",
+              "from": "https://github.com/fresheneesz/trimArguments/archive/e69ed3ebdfe6cf055916ba6e3a1e4b28f696da6f.tar.gz",
+              "resolved": "https://github.com/fresheneesz/trimArguments/archive/e69ed3ebdfe6cf055916ba6e3a1e4b28f696da6f.tar.gz"
+            }
+          }
+        }
+      }
+    },
+    "proto": {
+      "version": "1.0.10",
+      "from": "proto@"
+    }
+  }
+}
