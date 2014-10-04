@@ -9,7 +9,7 @@ Two routes that share a parent route can share some of the same functionality or
 
 Like [crossroads.js](http://millermedeiros.github.io/crossroads.js/), [router.js](https://github.com/tildeio/router.js), and [cherrytree](https://github.com/QubitProducts/cherrytree),
 `grapetree` embraces the [single-responsibility principle ](http://en.wikipedia.org/wiki/Single_responsibility_principle)
-and is entirely stand-alone, free of any dependencies on a framework of any kind.
+and is entirely stand-alone, free of dependencies on a framework of any kind.
 
 For a frontend application using grapetree, routes are the central part of the application - that's are where you create models, views and manage their lifecycle.
 
