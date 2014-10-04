@@ -1,11 +1,11 @@
 {
   "name": "grapetree",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "dependencies": {
     "grapetree-core": {
-      "version": "2.3.1",
-      "from": "grapetree-core@2.3.1",
-      "resolved": "https://registry.npmjs.org/grapetree-core/-/grapetree-core-2.3.1.tgz",
+      "version": "2.4.0",
+      "from": "grapetree-core@2.4.0",
+      "resolved": "https://registry.npmjs.org/grapetree-core/-/grapetree-core-2.4.0.tgz",
       "dependencies": {
         "async-future": {
           "version": "1.0.1",

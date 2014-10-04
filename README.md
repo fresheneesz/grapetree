@@ -271,6 +271,7 @@ Todo
 Changelog
 ========
 
+* 0.4.2 - upgrading core version
 * 0.4.1 - pulling in bug fix from core
 * 0.4.0 - pulling in change from core for redirecting
 * 0.3.0 - pulling in change from core for bubbling default handlers
