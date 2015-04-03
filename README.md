@@ -13,21 +13,23 @@ and is entirely stand-alone, free of dependencies on a framework of any kind.
 
 For a frontend application using grapetree, routes are the central part of the application - that's are where you create models, views and manage their lifecycle.
 
-Motivation
-============
-
-The main motivation for this library is to enable powerful and easy-to-understand url-routing for single-page applications.
-Very often, you want to build a website that gives users URLs they can save or share, and changes the url depending on their location within the site.
-Traditionally this was done with [url hash navigation](http://oshyn.com/_blog/General/post/JavaScript_Navigation_using_Hash_Change/),
-but modern websites are starting to use [the browser history API (or "pushState")](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history).
-Url routing is the way you describe how to switch between urls.
-
 Features
 =====================
 * Intuitive nested routing description
 * Route lifecycle hooks so each part of the path can have a setup and cleanup function
 * Intuitive error bubbling (errors bubble to the nearest handler up the tree)
 * Small footprint (< 16 KB unminified uncompressed)
+
+Motivation
+============
+
+The main motivation for this library is to enable powerful and easy-to-understand url-routing for single-page applications.
+Very often, you want to build a website that gives users URLs they can save or share, and changes the url depending on their location within the site.
+Url routing is the way you describe how to switch between urls.
+
+While GrapeTree doesn't proscribe whether you use traditional [url hash navigation](http://oshyn.com/_blog/General/post/JavaScript_Navigation_using_Hash_Change/),
+or the more modern [browser history API (or "pushState")](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history),
+it gives you the scaffolding you need to appropriately manage URLs.
 
 Example
 ========
@@ -258,10 +260,14 @@ Here are some facts about how errors are handled:
 
 * If a child route has an error and it bubbles up past its parent, its parent is not actually affected - all its enter and exit handlers are called as normal.
 * Errors bubble up from the route where they happened, to the error handler of nearest ancestor route that has one.
-* If a route has an error, the path will be incomplete (e.g. if you try to go to /a/b/c/d and there was an error at c, the path will end up bing /a/b)
+* If a route has an error, the path will be incomplete (e.g. if you try to go to /a/b/c/d and there was an error at c, the path will end up being /a/b)
 
 See [grapetree-core's unit tests](https://github.com/fresheneesz/grapetree-core/blob/master/test/grapetreeCoreTest.js) for exhaustive examples of how error handling works. For the most part, you should be able to use it well without fully understanding the intricacies of how it works.
 
+Recommendations
+===============
+
+If you're using grapetree for URL routing, I recommend that all URL changes that happen in your code go through grapetree using `router.go`, and conversely, any action that brings you somewhere that requires a URL change should be done using `router.go`. This is the right way to ensure that your URL always matches where in your application you are.
 
 Todo
 ====
