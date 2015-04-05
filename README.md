@@ -146,7 +146,11 @@ var GrapeTree = require('grapetree')
 Router objects
 --------------
 
-`router.go(newPath[, emitChangeEvent])` - Changes the current path and triggers the router to fire all the appropriate handlers. `newPath` is the path to change to, `emitChangeEvent` is whether to emit the `"change"` event (default true). Returns [a future](https://github.com/fresheneesz/asyncFuture) that is resolved when the route is complete or has an error that isn't handled by a Route's error handler.
+`router.go(newPath[, emitChangeEvent])` - Changes the current path and triggers the router to fire all the appropriate handlers. Returns [a future](https://github.com/fresheneesz/asyncFuture) that is resolved when the route is complete or has an error that isn't handled by a Route's error handler.
+
+* `newPath` - The path to change to.
+* `emitChangeEvent` - *(default true)* Whether to emit the `"change"` event.
+* `softQueue` - *(default true)* If true, causes the path to only be executed if it's the last one in the queue (and be discarded otherwise). If false, every queued path is handled in order.
 
 `router.transformPath(trasformFns)` - Sets up path transformation, which modifies the internal path before passing it as an argument to the `"change"` event and `Route.default` handlers and after getting an external path from the `router.go` and `Route.route` functions. This is mostly used for libraries that want to extend grapetree (like what grapetree itself does with grapetree-core).
 
@@ -264,6 +268,12 @@ Here are some facts about how errors are handled:
 
 See [grapetree-core's unit tests](https://github.com/fresheneesz/grapetree-core/blob/master/test/grapetreeCoreTest.js) for exhaustive examples of how error handling works. For the most part, you should be able to use it well without fully understanding the intricacies of how it works.
 
+Default Handlers
+================
+
+Like the error handlers, default handlers for a route also cover the scope of that route's children. In other words, if a child doesn't have a default route, its parent's (or grandparent's etc) default route will be used.
+This allows you to have a single default handlers at the top level that will catch any invalid route.
+
 Recommendations
 ===============
 
@@ -277,6 +287,7 @@ Todo
 Changelog
 ========
 
+* 1.0.0 - BREAKING CHANGE - pulling in new version of core, which makes softqueue the default.
 * 0.4.3 - upgrading core version
 * 0.4.2 - upgrading core version
 * 0.4.1 - pulling in bug fix from core
