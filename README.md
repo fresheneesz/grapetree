@@ -286,6 +286,7 @@ Todo
 
 Changelog
 ========
+* 1.1.1 - pulling in new version of core to fix a bug
 * 1.1.0 - adding `router.cur` property
 * 1.0.0 - BREAKING CHANGE - pulling in new version of core, which makes softqueue the default.
 * 0.4.3 - upgrading core version
