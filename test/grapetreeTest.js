@@ -80,6 +80,49 @@ Unit.test("grapetree", function(t) {
         router.go('"""/x/w"""').done()
     })
 
+    this.test('pass-through route', function(t) {
+
+        var n=0, event = function(event) {
+            n++
+            if(n===1) {
+                t.eq(event, "entered []")
+            } else if(n===2) {
+                t.eq(event, "entered b")
+            } else if(n===3) {
+                t.eq(event, "entered a")
+            } else if(n===4) {
+                t.eq(event, "entered []")
+            } else if(n===5) {
+                t.eq(event, "entered b")
+            } else {
+                throw new Error("unexpected event")
+            }
+        }
+
+        var router1 = Router(function() {
+            this.route('a', function() {
+                this.enter(function() {
+                    event("entered a")
+                })
+            })
+            this.route('/', function() {
+                this.enter(function() {
+                    event("entered []")
+                })
+
+                this.route('b', function() {
+                    this.enter(function() {
+                        event("entered b")
+                    })
+                })
+            })
+        })
+
+        router1.go('b', undefined, true).done()
+        router1.go('a', undefined, true).done()
+        router1.go('b', undefined, true).done()
+    })
+
     //*/
 
 

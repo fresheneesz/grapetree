@@ -11,7 +11,8 @@ Like [crossroads.js](http://millermedeiros.github.io/crossroads.js/), [router.js
 `grapetree` embraces the [single-responsibility principle ](http://en.wikipedia.org/wiki/Single_responsibility_principle)
 and is entirely stand-alone, free of dependencies on a framework of any kind.
 
-For a frontend application using grapetree, routes are the central part of the application - that's are where you create models, views and manage their lifecycle.
+For a frontend application using grapetree, routes are the central part of the application. Its where you manage the
+lifecycle of your views - when to create or destroy your views, and often when to change major parts of their state.
 
 Features
 =====================
@@ -273,6 +274,12 @@ Default Handlers
 
 Like the error handlers, default handlers for a route also cover the scope of that route's children. In other words, if a child doesn't have a default route, its parent's (or grandparent's etc) default route will be used.
 This allows you to have a single default handlers at the top level that will catch any invalid route.
+
+Techniques
+==========
+
+One non-obvious technique that you can use is to use an empty route to use a pass-through route to group code that is identical for only some paths in a given level.
+For more info, look at the unit test "pass-through route".
 
 Recommendations
 ===============

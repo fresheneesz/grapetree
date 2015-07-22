@@ -26,7 +26,7 @@ module.exports = proto(GrapeTreeCore, function(superclass) {
                 }
 
 
-                if(externalPath === '/') {
+                if(externalPath === '/' || externalPath === '') {
                     return []
                 }
                 if(externalPath.indexOf('/') === 0) {
